@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-import MarvelService from '../../services/MarvelService';
+import useMarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 
@@ -11,45 +11,32 @@ import './charList.scss';
 const CharList = (props) => {
 
     const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
     const [charOffset, setCharOffset] = useState(210);
     const [loadingMore, setLoadingMore] = useState(false);
     const [endList, setEndList] = useState(false);
+    
+    const {loading, error, getAllCharacters} = useMarvelService();
 
     useEffect(() => {
-        onUpdateList();
+        onUpdateList(charOffset, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    const marvelService = new MarvelService();
+    const onUpdateList = (offset, init) => {
 
-    const onUpdateList = (offset) => {
+        init ? setLoadingMore(false) : setLoadingMore(true);
 
-        onLoadingMore();
-
-        marvelService.getAllCharacters(offset)
+        getAllCharacters(offset)
         .then(onCharListLoaded)
-        .catch(onError)
     }
 
     const onCharListLoaded = (charData) => {
         const end = charData.length >= 9 ? false : true;
 
         setData(data => [...data ,...charData]);
-        setLoading(false);
         setCharOffset(charOffset => charOffset + 9);
         setLoadingMore(false);
         setEndList(end);
-    }
-
-    const onError = () => {
-        setLoading(false);
-        setError(true);
-    }
-
-    const onLoadingMore = () => {
-        setLoadingMore(true);
     }
 
     const myRef = useRef([]);
@@ -104,14 +91,12 @@ const CharList = (props) => {
                 {items}
             </ul>
         )
-    }
-    
+    }    
 
     const items = renderItems(data);
 
     const errorMsg = error ? <ErrorMessage/> : null
-    const spinner = loading ? <Spinner/> : null;
-    const content = !(error || spinner) ? items : null;
+    const spinner = loading && !loadingMore ? <Spinner/> : null;
 
 
     return (
@@ -119,7 +104,7 @@ const CharList = (props) => {
             
             {errorMsg}
             {spinner}
-            {content}
+            {items}
             
             <button className="button button__main button__long"
                     onClick={() => onUpdateList(charOffset)}
