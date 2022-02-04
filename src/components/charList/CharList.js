@@ -18,19 +18,19 @@ const CharList = (props) => {
     const {loading, error, getAllCharacters} = useMarvelService();
 
     useEffect(() => {
-        onUpdateList(charOffset, true);
+        onUpdateList(charOffset, true); 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const onUpdateList = (offset, init) => {
 
-        init ? setLoadingMore(false) : setLoadingMore(true);
+        init ? setLoadingMore(false) : setLoadingMore(true); // 2
 
         getAllCharacters(offset)
-        .then(onCharListLoaded)
+        .then(onCharListLoaded); 
     }
 
-    const onCharListLoaded = (charData) => {
+    const onCharListLoaded = (charData) => { 
         const end = charData.length >= 9 ? false : true;
 
         setData(data => [...data ,...charData]);
@@ -42,7 +42,7 @@ const CharList = (props) => {
     const myRef = useRef([]);
 
     const setElRef = (el, i) => {
-        myRef.current[i] = el
+        myRef.current[i] = el;
     }
 
     const onClickFocus = (i) => {
@@ -53,7 +53,6 @@ const CharList = (props) => {
             myRef.current[i].focus();
         }
     }
-
 
     const renderItems = (data) => {
         const items = data.map(({id, name, thumbnail}, i) => {

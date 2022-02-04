@@ -1,4 +1,5 @@
 import { useState, useEffect} from 'react';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 import ErrorMessage from '../errorMessage/ErrorMessage';
@@ -90,9 +91,10 @@ const View = ({char}) => {
                 {
                     comics.filter((e, i) => i < 10)
                     .map((el, i) => {
+                        const id = el.resourceURI.match(/\d{2,10}/);
                         return (
                             <li className="char__comics-item" key={i}>
-                                {el.name}
+                                <Link to={`/comics/${id}`}>{el.name}</Link>
                             </li>
                         )
                     })
