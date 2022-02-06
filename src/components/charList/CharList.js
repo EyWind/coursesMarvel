@@ -1,6 +1,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 import useMarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
@@ -63,31 +64,35 @@ const CharList = (props) => {
             const imgStyle = check ? {objectFit: 'contain'} : null;
             
             return (
-                <li 
-                    className='char__item'
-                    key={id}
-                    tabIndex={0}
-                    ref={e => setElRef(e,i)}
-                    onClick={() => {
-                        props.getCharId(id);
-                        onClickFocus(i);
-                    }}
-                    onKeyPress={(e) => {
-                        if (e.key === ' ' || e.key === 'Enter') {
-                            e.preventDefault();
+                <CSSTransition key={id} timeout={700} classNames="char__item">
+                    <li 
+                        className='char__item'
+                        // key={id}
+                        tabIndex={0}
+                        ref={e => setElRef(e,i)}
+                        onClick={() => {
                             props.getCharId(id);
                             onClickFocus(i);
-                        }
-                    }}>
-                        <img style={imgStyle} src={thumbnail} alt={name}/>
-                        <div className="char__name">{name}</div>
-                </li>
+                        }}
+                        onKeyPress={(e) => {
+                            if (e.key === ' ' || e.key === 'Enter') {
+                                e.preventDefault();
+                                props.getCharId(id);
+                                onClickFocus(i);
+                            }
+                        }}>
+                            <img style={imgStyle} src={thumbnail} alt={name}/>
+                            <div className="char__name">{name}</div>
+                    </li>
+                </CSSTransition>            
             )
         })
 
         return (
             <ul className="char__grid">
-                {items}
+                <TransitionGroup component={null}>
+                    {items}
+                </TransitionGroup>
             </ul>
         )
     }    
@@ -103,7 +108,7 @@ const CharList = (props) => {
             
             {errorMsg}
             {spinner}
-            {items}
+            {items}            
             
             <button className="button button__main button__long"
                     onClick={() => onUpdateList(charOffset)}
