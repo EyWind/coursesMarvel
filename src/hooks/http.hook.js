@@ -18,7 +18,6 @@ const useHttp = () => {  // often called entities that works with requests
 
          const data = res.json();
    
-
          setLoading(false);
          return data;
 

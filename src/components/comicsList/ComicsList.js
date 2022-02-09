@@ -43,7 +43,7 @@ const ComicsList = () => {
         const items = data.map(({id, title, price, thumbnail}, i) => {
 
             return (
-                <CSSTransition key={id} timeout={1500} classNames="comics__item">        
+                <CSSTransition key={i} timeout={1500} classNames="comics__item">        
                     <li className="comics__item">
                         <Link to={`${id}`}>
                             <img src={thumbnail} alt={title} className="comics__item-img"/>
