@@ -1,13 +1,27 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 import useMarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 
 import './charList.scss';
+
+const setContent = (process, Component, loadingMore) => {
+    switch (process) {
+        case 'waiting':
+            return <Spinner/>;
+        case 'loading':
+            return !loadingMore ? <Spinner/> : <Component/>;
+        case 'confirmed':
+            return <Component/>;
+        case 'error':
+            return <ErrorMessage/>;
+        default:
+            throw new Error('Unexpected process ocured');
+    }
+ }
 
 const CharList = (props) => {
 
@@ -16,7 +30,7 @@ const CharList = (props) => {
     const [loadingMore, setLoadingMore] = useState(false);
     const [endList, setEndList] = useState(false);
     
-    const {loading, error, getAllCharacters} = useMarvelService();
+    const {process, setProcess, getAllCharacters} = useMarvelService();
 
     useEffect(() => {
         onUpdateList(charOffset, true); 
@@ -28,7 +42,8 @@ const CharList = (props) => {
         init ? setLoadingMore(false) : setLoadingMore(true); // 2
 
         getAllCharacters(offset)
-        .then(onCharListLoaded); 
+            .then(onCharListLoaded)
+            .then(() => setProcess('confirmed'));
     }
 
     const onCharListLoaded = (charData) => { 
@@ -64,51 +79,44 @@ const CharList = (props) => {
             const imgStyle = check ? {objectFit: 'contain'} : null;
             
             return (
-                <CSSTransition key={id} timeout={700} classNames="char__item">
-                    <li 
-                        className='char__item'
-                        // key={id}
-                        tabIndex={0}
-                        ref={e => setElRef(e,i)}
-                        onClick={() => {
+                <li 
+                    className='char__item'
+                    key={id}
+                    tabIndex={0}
+                    ref={e => setElRef(e,i)}
+                    onClick={() => {
+                        props.getCharId(id);
+                        onClickFocus(i);
+                    }}
+                    onKeyPress={(e) => {
+                        if (e.key === ' ' || e.key === 'Enter') {
+                            e.preventDefault();
                             props.getCharId(id);
                             onClickFocus(i);
-                        }}
-                        onKeyPress={(e) => {
-                            if (e.key === ' ' || e.key === 'Enter') {
-                                e.preventDefault();
-                                props.getCharId(id);
-                                onClickFocus(i);
-                            }
-                        }}>
-                            <img style={imgStyle} src={thumbnail} alt={name}/>
-                            <div className="char__name">{name}</div>
-                    </li>
-                </CSSTransition>            
+                        }
+                    }}>
+                        <img style={imgStyle} src={thumbnail} alt={name}/>
+                        <div className="char__name">{name}</div>
+                </li>        
             )
         })
 
         return (
             <ul className="char__grid">
-                <TransitionGroup component={null}>
-                    {items}
-                </TransitionGroup>
+                {items}
             </ul>
         )
-    }    
+    }
 
-    const items = renderItems(data);
-
-    const errorMsg = error ? <ErrorMessage/> : null
-    const spinner = loading && !loadingMore ? <Spinner/> : null;
-
+    const elemets = useMemo(() => {
+        return setContent(process, () => renderItems(data), loadingMore)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [process])
 
     return (
         <div className="char__list">
             
-            {errorMsg}
-            {spinner}
-            {items}            
+            {elemets}
             
             <button className="button button__main button__long"
                     onClick={() => onUpdateList(charOffset)}

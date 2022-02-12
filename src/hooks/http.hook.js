@@ -2,12 +2,11 @@ import { useState, useCallback } from "react";
 
 const useHttp = () => {  // often called entities that works with requests
 
-   const [loading, setLoading] = useState(false);
-   const [error, setError] = useState(null);
+   const [process, setProcess] = useState('waiting');
 
    const request = useCallback(async (url, method = 'GET', body = null, headers = {'Content-Type': 'application/json'}) => {
 
-      setLoading(true);
+      setProcess('loading');
 
       try {
          const res = await fetch(url,{method, body, headers});
@@ -17,23 +16,22 @@ const useHttp = () => {  // often called entities that works with requests
          }
 
          const data = res.json();
-   
-         setLoading(false);
+
+         // setProcess('loading'); !NOOTE WE CANT DO IT HERE, it will cause an error
          return data;
 
       } catch (e) {
-         setLoading(false);
-         setError(e.message);
+         setProcess('error');
          throw e;
       }
       
    }, [])
 
    const cleartError = useCallback(() => {
-      setError(null);
+      setProcess('loading');
    }, [])
 
-   return {loading, error, request, cleartError};
+   return {process, setProcess, request, cleartError};
 }
 
 export default useHttp;

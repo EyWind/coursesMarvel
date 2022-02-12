@@ -1,12 +1,26 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 import useMarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 
 import './comicsList.scss';
+
+const setContent = (process, Component, loadingMore) => {
+    switch (process) {
+        case 'waiting':
+            return <Spinner/>;
+        case 'loading':
+            return !loadingMore ? <Spinner/> : <Component/>;
+        case 'confirmed':
+            return <Component/>;
+        case 'error':
+            return <ErrorMessage/>;
+        default:
+            throw new Error('Unexpected process ocured');
+    }
+ }
 
 const ComicsList = () => {
 
@@ -15,7 +29,7 @@ const ComicsList = () => {
     const [loadingMore, setLoadingMore] = useState(false);
     const [endList, setEndList] = useState(false);
 
-    const {loading, error, getAllComics} = useMarvelService();
+    const {process, setProcess, getAllComics} = useMarvelService();
 
     useEffect(() => {
         onUpdateList(comicsOffset, true)
@@ -26,7 +40,8 @@ const ComicsList = () => {
         init ? setLoadingMore(false): setLoadingMore(true);
 
         getAllComics(offset)
-        .then(onComicsLoaded)
+            .then(onComicsLoaded)
+            .then(() => setProcess('confirmed'));
     }
 
     const onComicsLoaded = (comicsData) => {
@@ -42,38 +57,29 @@ const ComicsList = () => {
     const renderItems = (data) => {
         const items = data.map(({id, title, price, thumbnail}, i) => {
 
-            return (
-                <CSSTransition key={i} timeout={1500} classNames="comics__item">        
-                    <li className="comics__item">
-                        <Link to={`${id}`}>
-                            <img src={thumbnail} alt={title} className="comics__item-img"/>
-                            <div className="comics__item-name">{title}</div>
-                            <div className="comics__item-price">{price}</div>
-                        </Link>
-                    </li>
-                </CSSTransition>            
+            return (      
+                <li className="comics__item" key={i}>
+                    <Link to={`${id}`}>
+                        <img src={thumbnail} alt={title} className="comics__item-img"/>
+                        <div className="comics__item-name">{title}</div>
+                        <div className="comics__item-price">{price}</div>
+                    </Link>
+                </li>          
             )
         })
 
         return (
             <ul className="comics__grid">
-                <TransitionGroup component={null}>
-                    {items}
-                </TransitionGroup>
+                {items}
             </ul>
         )
     }
 
-    const items = renderItems(comics)
-
-    const errorMsg = error ? <ErrorMessage /> : null;
-    const spinner = loading && !loadingMore ? <Spinner/> : null;
-
     return (
         <div className="comics__list">
-            {items}
-            {spinner}
-            {errorMsg}
+            
+            {setContent(process, () => renderItems(comics), loadingMore)}
+
             <button 
                     className="button button__main button__long"
                     onClick={() => onUpdateList(comicsOffset)}
