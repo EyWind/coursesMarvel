@@ -13,6 +13,5 @@ Goal of creating this app is to train in creating class components, upgrading it
 ## Note
 
 As i used test accounts to get api key, i left them as is, change api key in case of it's failure.
-This project with Redux, inside another repo.
 
 
