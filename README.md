@@ -4,7 +4,7 @@ Part of the "JS+React" program.
 
 ## Description
 
-Goal of creating this app is to train in creating class components, upgrading it to fn components, and to get experience with sone of the most used react practices, and in the end use Finite State Machine.
+Goal of creating this app is to train in creating class components, upgrading it to fn components, and to get experience with some of the most used react practices, and in the end use Finite State Machine.
 
 ### Dependencies
 
